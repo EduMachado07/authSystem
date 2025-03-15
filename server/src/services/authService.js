@@ -1,27 +1,43 @@
 import { User } from "../models/user.models.js";
 import { BadRequestError } from "../config/classErrors.config.js";
-import { Resend } from "resend";
+import sendEmail from "../middlewares/sendEmail.middlewares.js";
 import bycrpt from "bcrypt";
+import jwt from 'jsonwebtoken';
 
 const saltRounds = 10;
-const resend = new Resend("re_gCnr4R5j_8hsvqyqWM1f9d7Bm1iRYcdCS");
+const secretAccess = '360bc09ce54261f3511cb889d4f36051c15a83d3c055e0c698afc7dfe0ba9f6a';
+// const secretAccess = process.env.JWT_SECRET_ACCESS;
+const secretRefresh = process.env.JWT_SECRET_REFRESH;
 
-async function registerUser(name, lastName, email, password) {
+async function registerUser(res) {
+// async function registerUser(name, lastName, email, password) {
   // const user = await User.findOne({ where: { email } });
   // if (user) throw new BadRequestError("usuário já cadastrado");
 
   // const hashPassword = await bycrpt.hash(password, saltRounds);
 
-  const { data, error } = await resend.emails.send({
-    from: "Eduardo Machado <eduardo.machado.example.com >",
-    to: email,
-    subject: "Hello World",
-    html: "<strong>It works!</strong>",
+  // const newUser = await User.create({ name, lastName, email, hashPassword });
+
+  const email = 'eduardo';
+
+  const accessToken = jwt.sign({ email }, secretAccess, { expiresIn: "1h" });
+  // const refreshToken = jwt.sign({ email }, secretRefresh, { expiresIn: "24h" });
+
+  res.cookie('accessToken', accessToken, {
+    httpOnly: true,  // Impede o acesso ao cookie via JavaScript
+    secure: process.env.NODE_ENV === 'production',  // Só transmite em HTTPS
+    maxAge: 3600000, // 1 hora de validade (mesma duração do accessToken)
+    sameSite: 'Strict',  // Previne o envio do cookie em requisições de outros sites
   });
 
-  if (error) console.log(error);
-
-  // const newUser = await User.create({ name, lastName, email, hashPassword });
+  // res.cookie('refreshToken', refreshToken, {
+  //   httpOnly: true,
+  //   secure: process.env.NODE_ENV === 'production',
+  //   maxAge: 86400000, // 24 horas de validade (mesma duração do refreshToken)
+  //   sameSite: 'Strict',
+  // });
+  
+  await sendEmail('eduardo.silvamachado07@gmail.com');
 
   // return newUser;
 }
