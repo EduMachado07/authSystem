@@ -3,12 +3,12 @@ import { BadRequestError } from "../config/classErrors.config.js";
 
 const resend = new Resend("re_gCnr4R5j_8hsvqyqWM1f9d7Bm1iRYcdCS");
 
-async function sendEmail(email) {
-    const { error } = await resend.emails.send({
-        from: "Eduardo Machado <onboarding@resend.dev>",
-        to: email,
-        subject: "Seja bem vindo!",
-        html: `
+async function sendEmail(email, codigo) {
+  const { error } = await resend.emails.send({
+    from: "Eduardo Machado <onboarding@resend.dev>",
+    to: email,
+    subject: "Seja bem vindo!",
+    html: `
             <table role="presentation" style="width: 100%; background-color: #f1f1f1; padding: 40px 0;">
                 <tr>
                     <td align="center">
@@ -42,9 +42,9 @@ async function sendEmail(email) {
                 </tr>
             </table>
         `,
-      });
-    
-      if (error) BadRequestError(error);
+  });
+
+  if (error) throw new BadRequestError("error");
 }
 
 export default sendEmail;

@@ -25,4 +25,11 @@ export const User = database.define("user", {
     type: DataTypes.STRING(),
     allowNull: false,
   },
+  verificationCode: {
+    type: DataTypes.INTEGER,
+  },
+  emailActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
 });

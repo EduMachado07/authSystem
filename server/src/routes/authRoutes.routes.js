@@ -1,8 +1,14 @@
 import express from "express";
 
-import { Register, Login } from "../controllers/authController.controllers.js";
+import { Register, Login } from "../controllers/auth.controllers.js";
+import {
+  SendAuthCode,
+  VerifyAuthCode,
+} from "../controllers/authCode.controllers.js";
 
-export const authRoutes = express.Router();
+export const authRoute = express.Router();
 
-authRoutes.post("/register", Register);
-authRoutes.get("/register", Register);
+authRoute.post("/register", Register);
+authRoute.post("/login", Login);
+authRoute.post("/send-code", SendAuthCode);
+authRoute.post("/verify-code", VerifyAuthCode);
