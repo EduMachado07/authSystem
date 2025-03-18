@@ -20,8 +20,8 @@ async function sendEmailCode(email) {
   user.verificationCode = verificationCode;
   await user.save();
 
-  // ENVIA EMAIL
-  // await sendEmail(email, verificationCode);
+  // ENVIA EMAIL COM CÓDIGO
+  await sendEmail(email, verificationCode);
 
   return;
 }
