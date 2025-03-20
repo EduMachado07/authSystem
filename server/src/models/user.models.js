@@ -13,6 +13,10 @@ export const User = database.define("user", {
     allowNull: false,
   },
   lastName: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+  },
+  nameUser: {
     type: DataTypes.STRING(150),
     allowNull: false,
   },
@@ -32,4 +36,33 @@ export const User = database.define("user", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
+});
+
+export const Phone = database.define("phone", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
+  phoneNumber: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "user",
+      key: "id",
+    },
+  },
+});
+
+User.hasMany(Phone, {
+  foreignKey: "userId",
+  onDelete: "CASCADE",
+});
+Phone.belongsTo(User, {
+  foreignKey: "userId",
 });

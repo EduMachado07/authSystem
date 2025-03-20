@@ -3,23 +3,31 @@ import { BadRequestError } from "../config/classErrors.config.js";
 import bcrypt from "bcrypt";
 import { sendEmailCode } from "./authCode.services.js";
 
-const saltRounds = 10;
-
 // -- CADASTRO DE USUARIO NO BANCO DE DADOS --
 async function registerUser(name, lastName, email, password) {
   // VERIFICA CONTA EXISTENTE
   const user = await User.findOne({ where: { email } });
   if (user) throw new BadRequestError("Usuário já cadastrado no nosso sistema");
 
-  const hashPassword = await bcrypt.hash(password, saltRounds); // HASH DA SENHA
+  const hashPassword = bcrypt.hash(password, process.env.SALT_ROUNDS); // HASH DA SENHA
 
   // REGISTRA USUARIO NO BANCO
   const newUser = await User.create({
     name,
     lastName,
+    nameUser: `${name} ${lastName}`,
     email,
     password: hashPassword,
     emailActive: false,
+  });
+
+  await Phone.create({
+    phoneNumber: null,
+    userId: newUser.id,
+  });
+  await Phone.create({
+    phoneNumber: null,
+    userId: newUser.id,
   });
 
   await sendEmailCode(email);
@@ -38,4 +46,18 @@ async function loginUser(email, password) {
   return user;
 }
 
-export { registerUser, loginUser };
+// -- ASSINATURA DE TOKENS --
+async function signTokenJwt(email) {
+  const secretAccess = process.env.JWT_SECRET_ACCESS;
+  const secretRefresh = process.env.JWT_SECRET_REFRESH;
+
+  if (!secretAccess | !secretRefresh)
+    throw new BadRequestError("As chaves token não foram definidas");
+
+  const accessToken = jwt.sign({ email }, secretAccess, { expiresIn: "1h" });
+  const refreshToken = jwt.sign({ email }, secretRefresh, { expiresIn: "7d" });
+
+  return { accessToken, refreshToken };
+}
+
+export { registerUser, loginUser, signTokenJwt };

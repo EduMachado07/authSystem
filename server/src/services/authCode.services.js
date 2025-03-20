@@ -5,7 +5,7 @@ import {
   UnauthorizedError,
 } from "../config/classErrors.config.js";
 
-// -- VERIFICA CODIGO DE EMAIL --
+// -- ENVIA UM CODIGO POR EMAIL --
 async function sendEmailCode(email) {
   const user = await User.findOne({ where: { email } });
   if (!user)
@@ -14,7 +14,7 @@ async function sendEmailCode(email) {
   const generateCode = () =>
     Math.floor(100000 + Math.random() * 900000).toString();
 
-  const verificationCode = generateCode(); // CODIGO VERIFICACAO
+  const verificationCode = generateCode(); // CODIGO DE VERIFICACAO
 
   // REGISTRA CODIGO DO USUARIO NO BANCO
   user.verificationCode = verificationCode;
@@ -26,7 +26,7 @@ async function sendEmailCode(email) {
   return;
 }
 
-// -- VERIFICA CODIGO DE EMAIL --
+// -- VERIFICA O CODIGO DO EMAIL --
 async function verifyAuthCode(email, code) {
   // VERIFICA CONTA EXISTENTE
   const user = await User.findOne({ where: { email } });
@@ -36,6 +36,7 @@ async function verifyAuthCode(email, code) {
   if (user.verificationCode !== code)
     throw new UnauthorizedError("código informado está incorreto");
 
+  // ATUALIZA USUARIO NO BANCO
   user.verificationCode = null;
   user.emailActive = true;
   await user.save();

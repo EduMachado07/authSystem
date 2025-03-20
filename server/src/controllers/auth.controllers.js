@@ -1,6 +1,5 @@
 import { BadRequestError } from "../config/classErrors.config.js";
-import { registerUser, loginUser } from "../services/auth.services.js";
-import signTokenJwt from "../services/signToken.services.js";
+import { registerUser, loginUser, signTokenJwt } from "../services/auth.services.js";
 
 async function Register(req, res, next) {
   try {
