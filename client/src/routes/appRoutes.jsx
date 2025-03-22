@@ -5,6 +5,7 @@ import FormsLogin from "@/features/auth/components/formsLogin";
 import FormsRegister from "@/features/auth/components/formsRegister";
 import FormsEmail from "@/features/auth/components/formsEmail";
 import FormsResetPassword from "@/features/auth/components/formsResetPassword";
+import AuthCode from "@/features/auth/components/authCode";
 
 import Profile from "@/features/profile/profile";
 
@@ -21,6 +22,7 @@ export const Routes = createBrowserRouter([
       { path: "register", element: <FormsRegister /> },
       { path: "user-email", element: <FormsEmail /> },
       { path: "reset-password", element: <FormsResetPassword /> },
+      { path: "auth-code", element: <AuthCode /> },
     ],
   },
   {

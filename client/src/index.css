@@ -148,8 +148,8 @@
   .text-colorPrimary {
     color: var(--colorSecondary);
   }
-  .border-primary {
-    border-color: var(--colorTextBold);
+  .border-borderPrimary {
+    border-color: var(--colorText);
   }
 }
 

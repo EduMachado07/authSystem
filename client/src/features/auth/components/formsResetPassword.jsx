@@ -2,11 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { Link } from "react-router-dom";
-
 const FormsResetPassword = () => {
   return (
-    <form className="w-full flex flex-col gap-7">
+    <form className="w-full flex flex-col gap-8">
       <h1 className="text-3xl text-colorPrimary font-bold w-full">
         Nova Senha
       </h1>

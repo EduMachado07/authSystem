@@ -5,11 +5,11 @@ import background from "../../assets/imgLogin.jpg";
 function Auth() {
   return (
     <main className="h-dvh flex">
-      <section className="md:w-2/5 max-md:hidden overflow-hidden">
-        <img src={background} alt="" />
+      <section className="xl:w-2/5 h-full max-lg:hidden overflow-hidden">
+        <img src={background} alt="" className="max-2xl:h-full" />
       </section>
       {/* FORMULARIO */}
-      <section className="bg-colorBack h-full md:w-3/5 w-full flex flex-col gap-7 justify-center items-center px-7 md:px-40">
+      <section className="bg-colorBack h-full xl:w-3/5 w-full flex flex-col gap-7 justify-center items-center px-7 xl:px-58">
         {/* -- component forms -- */}
         <Outlet />
       </section>

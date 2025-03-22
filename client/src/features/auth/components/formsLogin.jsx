@@ -2,25 +2,71 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Google from "./svgGoogle";
 import Github from "./svgGithub";
 
-const FormsLogin = () => {
-  return (
-    <form className="w-full flex flex-col gap-7">
-      <h1 className="text-3xl text-colorPrimary font-bold w-full">Login</h1>
+import { useForm, Controller } from "react-hook-form";
 
+const FormsLogin = () => {
+  const navigate = useNavigate();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+
+    navigate("/profile");
+  }
+
+  return (
+    <form
+      className="w-full flex flex-col gap-7"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <h1 className="text-3xl text-colorPrimary font-bold w-full">Login</h1>
+      {errors?.email?.type === "required" ? (
+        <p>email é obrigatório</p>
+      ) : errors?.password?.type === "required" ? (
+        <p>senha é obrigatória</p>
+      ) : (
+        <p>campos não preenchidos</p>
+      )}
+
+      
       {/* campo email */}
       <section className="flex flex-col gap-3">
         <Label htmlFor="email">E-mail</Label>
-        <Input id="email" placeholder="seu email" />
+        <Controller
+          name="email"
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <Input {...field} id="email" placeholder="seu email" />
+          )}
+        />
       </section>
       {/* campo senha */}
       <section className="flex flex-col gap-3">
         <Label htmlFor="password">Senha</Label>
-        <Input id="password" type="password" placeholder="senha" />
+        <Controller
+          name="password"
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="password"
+              type="password"
+              placeholder="senha"
+            />
+          )}
+        />
       </section>
 
       <Button type="submit" size={"lg"}>
