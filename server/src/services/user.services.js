@@ -1,101 +1,115 @@
 import { Phone, User } from "../models/user.models.js";
 import { BadRequestError } from "../config/classErrors.config.js";
+import { sendEmailCode } from "./authCode.services.js";
+import bcrypt from "bcrypt";
 
-async function newNameUser(req, res, next) {
-  try {
-    const { email, nameUser } = req.body;
+async function newNameUser(email, nameUser) {
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new BadRequestError("usuário não encontrado");
 
-    const user = await User.findOne({ where: { email } });
-    if (!user) throw new BadRequestError("usuário não encontrado");
-
-    user.nameUser = nameUser;
-    await user.save();
-
-    return user;
-  } catch (error) {
-    next(error);
+  if (user.nameUser === nameUser) {
+    throw new BadRequestError("O novo nome de usuário é igual ao atual");
   }
+
+  user.nameUser = nameUser;
+  await user.save();
+
+  return user;
 }
-async function newEmail(req, res, next) {
-  try {
-    const { email, newEmail } = req.body;
+async function newEmail(email, newAdressEmail) {
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new BadRequestError("Usuário não encontrado");
 
-    const user = await User.findOne({ where: { email } });
-    if (!user) throw new BadRequestError("usuário não encontrado");
-
-    user.email = newEmail;
-    await user.save();
-
-    return user;
-  } catch (error) {
-    next(error);
+  // VERIFICA SE O NOVO EMAIL JÁ EXISTE NO BANCO DE DADOS
+  const existingUser = await User.findOne({ where: { email: newAdressEmail } });
+  if (existingUser) {
+    throw new BadRequestError(
+      "Este e-mail já está sendo utilizado por outro usuário"
+    );
   }
+
+  if (user.email === newAdressEmail) {
+    throw new BadRequestError("O novo e-mail é igual ao atual");
+  }
+
+  user.email = newAdressEmail;
+  user.emailActive = false;
+  await user.save();
+
+  // await sendEmailCode(newAdressEmail);
+
+  return user;
 }
-async function newPassword(req, res, next) {
-  try {
-    const { email, password } = req.body;
+async function newPassword(email, password) {
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new BadRequestError("usuário não encontrado");
 
-    const user = await User.findOne({ where: { email } });
-    if (!user) throw new BadRequestError("usuário não encontrado");
-
-    const newHashPassword = await bcrypt.hash(
-      password,
-      process.env.SALT_ROUNDS
-    ); // HASH DA SENHA
-
-    user.password = newHashPassword;
-    await user.save();
-
-    return user;
-  } catch (error) {
-    next(error);
+  const isSamePassword = await bcrypt.compare(password, user.password);
+  if (isSamePassword) {
+    throw new BadRequestError("A nova senha é igual a atual");
   }
+
+  const newHashPassword = await bcrypt.hash(
+    password,
+    Number(process.env.SALT_ROUNDS)
+  ); // HASH DA SENHA
+
+  user.password = newHashPassword;
+  await user.save();
+
+  return user;
 }
-async function newPhones(req, res, next) {
-  try {
-    const { email, firstPhoneNumber, secondPhoneNumber } = req.body;
+async function newPhones(email, firstPhoneNumber, secondPhoneNumber) {
+  // PROCURA USUARIO
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new BadRequestError("usuário não encontrado");
 
-    const user = await User.findOne({ where: { email } });
-    if (!user) throw new BadRequestError("usuário não encontrado");
+  // PROCURA OS TELEFONES EM ORDEM
+  const phones = await Phone.findAll({
+    where: { userId: user.id },
+    order: [["id", "ASC"]],
+  });
 
-    const phone = await Phone.findOne({
-      where: { userId: user.id },
-    });
-
-    phone.phoneNumber = firstPhoneNumber;
-    phone.phoneNumber = secondPhoneNumber;
-    await user.save();
-
-    return user;
-  } catch (error) {
-    next(error);
+  // VERIFICA SE EXISTEM DOIS TELEFONES
+  if (phones.length < 2) {
+    throw new BadRequestError("O usuário não possui telefones cadastrados.");
   }
+
+  // ATUALIZA OS TELEFONES
+  if (phones[0]) {
+    phones[0].phoneNumber = firstPhoneNumber || null;
+    await phones[0].save();
+  }
+  if (phones[1]) {
+    phones[1].phoneNumber = secondPhoneNumber || null;
+    await phones[1].save();
+  }
+
+  return user;
 }
-async function getUser(req, res, next) {
-  try {
-    const { email } = req.body;
+async function getUser(email) {
+  // PROCURA USUARIO
+  const user = await User.findOne({
+    where: { email },
+    attributes: { exclude: ["id", "password", "verificationCode"] },
+    include: {
+      model: Phone,
+      attributes: { exclude: ["id", "userId", "createdAt", "updatedAt"] },
+    },
+  });
+  if (!user) throw new BadRequestError("usuário não encontrado");
 
-    const user = await User.findOne({ where: { email } });
-    if (!user) throw new BadRequestError("usuário não encontrado");
-    3;
-    return user;
-  } catch (error) {
-    next(error);
-  }
+  return user;
 }
-async function deleteUser(req, res, next) {
-  try {
-    const { email } = req.body;
+async function deleteUser(email) {
+  // PROCURA USUARIO
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new BadRequestError("usuário não encontrado");
 
-    const user = await User.findOne({ where: { email } });
-    if (!user) throw new BadRequestError("usuário não encontrado");
+  // REMOVE USUARIO DO BANCO DE DADOS
+  await Phone.destroy({ where: { userId: user.id } });
+  await user.destroy();
 
-    await Phone.destroy({ where: { userId: user.id } });
-    await user.destroy();
-
-    return user;
-  } catch (error) {
-    next(error);
-  }
+  return user;
 }
 export { newNameUser, newPassword, newEmail, newPhones, getUser, deleteUser };

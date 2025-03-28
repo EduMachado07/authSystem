@@ -1,7 +1,8 @@
-import { User } from "../models/user.models.js";
+import { User, Phone } from "../models/user.models.js";
 import { BadRequestError } from "../config/classErrors.config.js";
 import bcrypt from "bcrypt";
 import { sendEmailCode } from "./authCode.services.js";
+import jwt from "jsonwebtoken";
 
 // -- CADASTRO DE USUARIO NO BANCO DE DADOS --
 async function registerUser(name, lastName, email, password) {
@@ -9,7 +10,10 @@ async function registerUser(name, lastName, email, password) {
   const user = await User.findOne({ where: { email } });
   if (user) throw new BadRequestError("Usuário já cadastrado no nosso sistema");
 
-  const hashPassword = bcrypt.hash(password, process.env.SALT_ROUNDS); // HASH DA SENHA
+  const hashPassword = await bcrypt.hash(
+    password,
+    Number(process.env.SALT_ROUNDS)
+  ); // HASH DA SENHA
 
   // REGISTRA USUARIO NO BANCO
   const newUser = await User.create({
@@ -21,14 +25,9 @@ async function registerUser(name, lastName, email, password) {
     emailActive: false,
   });
 
-  await Phone.create({
-    phoneNumber: null,
-    userId: newUser.id,
-  });
-  await Phone.create({
-    phoneNumber: null,
-    userId: newUser.id,
-  });
+  // ✅ CRIA DOIS TELEFONES VAZIOS
+  await Phone.create({ phoneNumber: null, userId: newUser.id });
+  await Phone.create({ phoneNumber: null, userId: newUser.id });
 
   await sendEmailCode(email);
 
@@ -54,8 +53,8 @@ async function signTokenJwt(email) {
   if (!secretAccess | !secretRefresh)
     throw new BadRequestError("As chaves token não foram definidas");
 
-  const accessToken = jwt.sign({ email }, secretAccess, { expiresIn: "1h" });
-  const refreshToken = jwt.sign({ email }, secretRefresh, { expiresIn: "7d" });
+  const accessToken = jwt.sign({ email }, secretAccess, { expiresIn: "15m" });
+  const refreshToken = jwt.sign({ email }, secretRefresh, { expiresIn: "3d" });
 
   return { accessToken, refreshToken };
 }

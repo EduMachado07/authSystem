@@ -13,21 +13,24 @@ async function AlterNameUser(req, res, next) {
     const { email, nameUser } = req.body;
     if (!email || !nameUser) throw new BadRequestError("Dados não informados");
 
+    // FUNCAO PARA ALTERAR NOME DE USUARIO
     const user = await newNameUser(email, nameUser);
 
-    res.status(201).json({ message: "email do usuario alterado", user });
+    res.status(201).json({ message: "Nome do usuario alterado" });
   } catch (error) {
     next(error);
   }
 }
 async function AlterEmail(req, res, next) {
   try {
-    const { email, newEmail } = req.body;
-    if (!email) throw new BadRequestError("Dados não informados");
+    const { email, newAdressEmail } = req.body;
+    if (!email || !newAdressEmail)
+      throw new BadRequestError("Dados não informados");
 
-    const user = await newEmail(email, newEmail);
+    // FUNCAO PARA ALTERAR EMAIL DO USUARIO
+    const user = await newEmail(email, newAdressEmail);
 
-    res.status(201).json({ message: "email do usuario alterado", user });
+    res.status(201).json({ message: "Email do usuario alterado" });
   } catch (error) {
     next(error);
   }
@@ -37,9 +40,10 @@ async function AlterPassword(req, res, next) {
     const { email, password } = req.body;
     if (!email || !password) throw new BadRequestError("Dados não informados");
 
+    // FUNCAO PARA ALTERAR SENHA DO USUARIO
     const user = await newPassword(email, password);
 
-    res.status(201).json({ message: "nova senha criada", user });
+    res.status(201).json({ message: "Senha do usuário alterada" });
   } catch (error) {
     next(error);
   }
@@ -47,12 +51,12 @@ async function AlterPassword(req, res, next) {
 async function AlterPhones(req, res, next) {
   try {
     const { email, firstPhoneNumber, secondPhoneNumber } = req.body;
-    if (!email || !firstPhoneNumber || secondPhoneNumber)
-      throw new BadRequestError("Dados não informados");
+    if (!email) throw new BadRequestError("Dados não informados");
 
-    const user = await newPhones(email, firstPhoneNumber, secondPhoneNumber);
+    // FUNCAO PARA ALTERAR TELEFONES
+    await newPhones(email, firstPhoneNumber, secondPhoneNumber);
 
-    res.status(201).json({ message: "telefones do usuárrio alterados", user });
+    res.status(201).json({ message: "Telefones do usuário alterados" });
   } catch (error) {
     next(error);
   }
@@ -61,10 +65,10 @@ async function DataUser(req, res, next) {
   try {
     const { email } = req.body;
     if (!email) throw new BadRequestError("Dados não informados");
-
+    // FUNCAO DE BUSCA DE DADOS DO USUARIO
     const user = await getUser(email);
 
-    res.status(201).json({ message: "telefones do usuárrio alterados", user });
+    res.status(201).json({ message: "Usuário encontrado", user });
   } catch (error) {
     next(error);
   }
@@ -73,10 +77,10 @@ async function DeleteUser(req, res, next) {
   try {
     const { email } = req.body;
     if (!email) throw new BadRequestError("Dados não informados");
+    // FUNCAO PARA DELETAR CONTA DO USUARIO
+    await deleteUser(email);
 
-    const user = await deleteUser(email);
-
-    res.status(201).json({ message: "telefones do usuárrio alterados", user });
+    res.status(201).json({ message: "Usuário removido do sistema" });
   } catch (error) {
     next(error);
   }

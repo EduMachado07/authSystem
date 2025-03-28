@@ -1,5 +1,9 @@
 import { BadRequestError } from "../config/classErrors.config.js";
-import { registerUser, loginUser, signTokenJwt } from "../services/auth.services.js";
+import {
+  registerUser,
+  loginUser,
+  signTokenJwt,
+} from "../services/auth.services.js";
 
 async function Register(req, res, next) {
   try {
@@ -7,24 +11,22 @@ async function Register(req, res, next) {
     if (!name || !lastName || !email || !password)
       throw new BadRequestError("Dados do usuário insuficientes");
 
-    await registerUser(name, lastName, email, password);
+    const user = await registerUser(name, lastName, email, password);
 
     const { accessToken, refreshToken } = await signTokenJwt(email);
-    // DEFINE TOKEN COMO COOKIE
+    // ENVIA TOKENS COMO COOKIES
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 3600000, // 1 hora
-      sameSite: "Strict",
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 604800000, // 7 dias
+      maxAge: 3 * 24 * 60 * 60 * 1000, // 3 dias
       sameSite: "Strict",
     });
 
-    res.status(201).json({ message: "usuário criado" });
+    res.status(201).json({ message: "usuário criado", user });
   } catch (error) {
     next(error);
   }
@@ -39,17 +41,15 @@ async function Login(req, res, next) {
     await loginUser(email, password);
 
     const { accessToken, refreshToken } = await signTokenJwt(email);
-    // DEFINE TOKEN COMO COOKIE
+    // ENVIA TOKENS COMO COOKIES
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV,
-      maxAge: 3600000, // 1 hora
-      sameSite: "Strict",
+      secure: process.env.NODE_ENV === "production",
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV,
-      maxAge: 604800000, // 7 dias
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 3 * 24 * 60 * 60 * 1000, // 3 dias
       sameSite: "Strict",
     });
 

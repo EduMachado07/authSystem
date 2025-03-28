@@ -47,13 +47,13 @@ export const Phone = database.define("phone", {
   },
   phoneNumber: {
     type: DataTypes.STRING(20),
-    allowNull: false,
+    allowNull: true,
   },
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: "user",
+      model: "users",
       key: "id",
     },
   },
