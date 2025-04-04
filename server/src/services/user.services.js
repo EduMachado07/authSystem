@@ -91,10 +91,8 @@ async function getUser(email) {
   // PROCURA USUARIO
   const user = await User.findOne({
     where: { email },
-    attributes: { exclude: ["id", "password", "verificationCode"] },
     include: {
       model: Phone,
-      attributes: { exclude: ["id", "userId", "createdAt", "updatedAt"] },
     },
   });
   if (!user) throw new BadRequestError("usuário não encontrado");

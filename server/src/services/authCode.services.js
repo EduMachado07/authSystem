@@ -1,15 +1,22 @@
-import { User } from "../models/user.models.js";
+import { User, UrlVerificationToken } from "../models/user.models.js";
 import sendEmail from "../middlewares/sendEmail.middlewares.js";
 import {
   BadRequestError,
   UnauthorizedError,
 } from "../config/classErrors.config.js";
+import crypto from "crypto";
 
 // -- VERIFICA CODIGO DE EMAIL --
 async function sendEmailCode(email) {
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+
   const user = await User.findOne({ where: { email } });
-  // if (!user)
-  //   throw new BadRequestError("Usuário não encontrado em nosso sistema");
+
+  await UrlVerificationToken.create({
+    userId: user.id,
+    token: verificationToken,
+    // expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  });
 
   const generateCode = () =>
     Math.floor(100000 + Math.random() * 900000).toString();
@@ -20,7 +27,7 @@ async function sendEmailCode(email) {
   await user.save();
 
   // ENVIA EMAIL
-  await sendEmail(email, verificationCode);
+  await sendEmail(email, verificationCode, verificationToken);
 
   return;
 }

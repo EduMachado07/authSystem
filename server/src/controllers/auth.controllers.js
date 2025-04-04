@@ -9,7 +9,7 @@ async function Register(req, res, next) {
   try {
     const { name, lastName, email, password } = req.body;
     if (!name || !lastName || !email || !password)
-      throw new BadRequestError("Dados do usuário insuficientes");
+      throw new BadRequestError("Dados não informados");
 
     const user = await registerUser(name, lastName, email, password);
 
@@ -35,8 +35,7 @@ async function Register(req, res, next) {
 async function Login(req, res, next) {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
-      throw new BadRequestError("Dados do usuário insuficientes");
+    if (!email || !password) throw new BadRequestError("Dados não informados");
 
     await loginUser(email, password);
 

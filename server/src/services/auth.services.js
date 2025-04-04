@@ -1,4 +1,4 @@
-import { User, Phone } from "../models/user.models.js";
+import { User, Phone, UrlVerificationToken } from "../models/user.models.js";
 import { BadRequestError } from "../config/classErrors.config.js";
 import bcrypt from "bcrypt";
 import { sendEmailCode } from "./authCode.services.js";
@@ -31,18 +31,30 @@ async function registerUser(name, lastName, email, password) {
 
   await sendEmailCode(email);
 
-  return newUser;
+  const returnUser = await User.findOne({
+    where: { email },
+    include: [{ model: Phone }, { model: UrlVerificationToken }],
+  });
+
+  return returnUser;
 }
 
 async function loginUser(email, password) {
   const user = await User.findOne({ where: { email } });
   if (!user)
-    throw new BadRequestError("usuário não encontrado em nosso sistema");
+    throw new BadRequestError("Usuário não encontrado em nosso sistema");
 
   const passwordVerified = await bcrypt.compare(password, user.password);
-  if (!passwordVerified) throw new BadRequestError("senha incorreta");
+  if (!passwordVerified) throw new BadRequestError("Senha incorreta");
 
-  return user;
+  const returnUser = await User.findOne({
+    where: { email },
+    include: {
+      model: Phone,
+    },
+  });
+
+  return returnUser;
 }
 
 // -- ASSINATURA DE TOKENS --

@@ -18,7 +18,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendEmail(email, codigo) {
+async function sendEmail(email, code, urlToken) {
+  const linkVerification = `${process.env.CLIENT_VERIFY_CODE}?token=${urlToken}`;
   try {
     await transporter.sendMail({
       from: "Eduardo Machado <onboarding@resend.dev>",
@@ -41,12 +42,12 @@ async function sendEmail(email, codigo) {
                         </tr>
                         <tr>
                             <td style="padding: 20px 0;">
-                                <p style="letter-spacing: 4px; font-size: 40px; font-weight: 700; padding: 0px 5px; color: #27476e; margin: 0;">${codigo}</p>
+                                <p style="letter-spacing: 4px; font-size: 40px; font-weight: 700; padding: 0px 5px; color: #27476e; margin: 0;">${code}</p>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <a href="http://localhost:5173/login" style="text-decoration: none; cursor: pointer;">
+                                <a href="${linkVerification}" style="text-decoration: none; cursor: pointer;">
                                     <button style="padding: 12px 25px; border: none; border-radius: 4px; background-color: #27476e; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;">
                                         Liberar acesso
                                     </button>

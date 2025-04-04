@@ -1,8 +1,8 @@
 import { app } from "./app.js";
 import { connectBd } from "./src/config/connectBd.config.js";
 import dotenv from "dotenv";
-dotenv.config();
 
+dotenv.config();
 const port = process.env.PORT_SERVER;
 
 (async () => {

@@ -2,26 +2,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { Link, useNavigate } from "react-router-dom";
-
 import Google from "./svgGoogle";
 import Github from "./svgGithub";
 
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
+import { apiAuth } from "@/store/configAxios";
 
 const FormsLogin = () => {
   const navigate = useNavigate();
+  const [errorApi, setErrorApi] = useState("");
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitted },
   } = useForm();
 
-  function onSubmit(data) {
-    console.log(data);
+  async function onSubmit(data) {
+    try {
+      const res = await apiAuth.post("/login", {
+        email: data.email,
+        password: data.password,
+      });
+      console.log(res);
 
-    navigate("/profile");
+      navigate("/profile");
+    } catch (error) {
+      setErrorApi(error.response.data.message);
+      console.log(error.response.data);
+    }
   }
 
   return (
@@ -30,26 +41,42 @@ const FormsLogin = () => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <h1 className="text-3xl text-colorPrimary font-bold w-full">Login</h1>
-      {errors?.email?.type === "required" ? (
-        <p>email é obrigatório</p>
-      ) : errors?.password?.type === "required" ? (
-        <p>senha é obrigatória</p>
-      ) : (
-        <p>campos não preenchidos</p>
-      )}
+      {/* {isSubmitted && (errors?.email || errors?.password) && (
+        <p className="text-red-500 font-semibold">Informe todos os campos</p>
+      )} */}
 
-      
+      {errorApi && <p className="text-red-500 font-semibold">{errorApi}</p>}
+
       {/* campo email */}
       <section className="flex flex-col gap-3">
         <Label htmlFor="email">E-mail</Label>
         <Controller
           name="email"
           control={control}
-          rules={{ required: true }}
+          rules={{
+            required: "E-mail é obrigatório",
+            pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+              message: "Formato do e-mail inválido",
+            },
+          }}
           render={({ field }) => (
-            <Input {...field} id="email" placeholder="seu email" />
+            <Input
+              {...field}
+              id="email"
+              placeholder="seu email"
+              onChange={(e) => {
+                field.onChange(e);
+                setErrorApi(""); // Limpa o erro ao modificar o input
+              }}
+            />
           )}
         />
+        {errors.email && (
+          <p className="text-red-500 font-semibold text-sm">
+            {errors.email.message}
+          </p>
+        )}
       </section>
       {/* campo senha */}
       <section className="flex flex-col gap-3">
@@ -57,16 +84,25 @@ const FormsLogin = () => {
         <Controller
           name="password"
           control={control}
-          rules={{ required: true }}
+          rules={{ required: "Senha é obrigatória" }}
           render={({ field }) => (
             <Input
               {...field}
               id="password"
               type="password"
               placeholder="senha"
+              onChange={(e) => {
+                field.onChange(e);
+                setErrorApi("");
+              }}
             />
           )}
         />
+        {errors.password && (
+          <p className="text-red-500 font-semibold text-sm">
+            {errors.password.message}
+          </p>
+        )}
       </section>
 
       <Button type="submit" size={"lg"}>
