@@ -2,14 +2,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { apiAuth } from "@/store/configAxios";
 
 const FormsEmail = () => {
+  const navigate = useNavigate();
+  const [errorApi, setErrorApi] = useState("");
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  async function onSubmit(data) {
+    try {
+      const res = await apiAuth.post("/alter-password", {
+        email: data.email,
+      });
+
+      const tokenUrl = res.data.user.UrlVerificationTokens[0].token;
+
+      navigate(`/auth-code?token=${tokenUrl}`);
+    } catch (error) {
+      setErrorApi(error.response.data.message);
+      console.log(error.response.data);
+    }
+  }
+
   return (
-    <form className="w-full flex flex-col gap-7">
+    <form
+      className="w-full flex flex-col gap-7"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <h1 className="text-3xl text-colorPrimary font-bold w-full">
         Redefinir Senha
       </h1>
+
+      {errorApi && (
+        <p className="text-red-500 font-semibold -mb-3">{errorApi}</p>
+      )}
 
       <p className="text-md font-semibold text-pretty">
         Informe o seu e-mail para encontrarmos a sua conta, e assim, enviarmos
@@ -19,7 +53,33 @@ const FormsEmail = () => {
       {/* campo email */}
       <section className="flex flex-col gap-3">
         <Label htmlFor="email">E-mail</Label>
-        <Input id="email" placeholder="seu email" />
+        <Controller
+          name="email"
+          control={control}
+          rules={{
+            required: "Informe o seu e-mail",
+            pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+              message: "Formato do e-mail inválido",
+            },
+          }}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="email"
+              placeholder="seu email"
+              onChange={(e) => {
+                field.onChange(e);
+                setErrorApi(""); // Limpa o erro ao modificar o input
+              }}
+            />
+          )}
+        />
+        {errors.email && (
+          <p className="text-red-500 font-semibold text-sm">
+            {errors.email.message}
+          </p>
+        )}
       </section>
 
       <Button type="submit" size={"lg"}>

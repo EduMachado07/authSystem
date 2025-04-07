@@ -41,7 +41,7 @@ export const User = database.define(
   },
   {
     defaultScope: {
-      attributes: { exclude: ["password", "verificationCode"] },
+      attributes: { exclude: ["password"] },
     },
   }
 );
@@ -74,28 +74,20 @@ export const Phone = database.define(
     },
   }
 );
-export const UrlVerificationToken = database.define(
-  "UrlVerificationToken",
-  {
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    token: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    // expiresAt: {
-    //   type: DataTypes.DATE,
-    //   allowNull: false,
-    // },
+export const UrlVerificationToken = database.define("UrlVerificationToken", {
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
-  {
-    defaultScope: {
-      attributes: ["token"],
-    },
-  }
-);
+  token: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  // expiresAt: {
+  //   type: DataTypes.DATE,
+  //   allowNull: false,
+  // },
+});
 
 User.hasMany(Phone, {
   foreignKey: "userId",

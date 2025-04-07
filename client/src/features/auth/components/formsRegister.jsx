@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 // import Github from "./svgGithub";
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { apiAuth } from "@/store/configAxios";
 

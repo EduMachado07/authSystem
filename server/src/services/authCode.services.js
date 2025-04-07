@@ -33,14 +33,18 @@ async function sendEmailCode(email) {
 }
 
 // -- VERIFICA CODIGO DE EMAIL --
-async function verifyAuthCode(email, code) {
-  // VERIFICA CONTA EXISTENTE
-  const user = await User.findOne({ where: { email } });
+async function verifyAuthCode(token, code) {
+  const userToken = await UrlVerificationToken.findOne({ where: { token } });
 
-  if (!user) throw new BadRequestError("usuário não encontrado");
-  if (user.emailActive) throw new BadRequestError("email já está ativo");
-  if (user.verificationCode !== code)
-    throw new UnauthorizedError("código informado está incorreto");
+  if (!userToken) throw new BadRequestError("Token inválido ou expirado");
+
+  // VERIFICA CONTA EXISTENTE
+  const user = await User.findOne({ where: { id: userToken.userId } });
+
+  if (!user) throw new BadRequestError("Usuário não encontrado");
+  if (user.emailActive) throw new BadRequestError("Email já está ativo");
+  if (user.verificationCode !== parseInt(code))
+    throw new UnauthorizedError("Código informado está incorreto");
 
   user.verificationCode = null;
   user.emailActive = true;

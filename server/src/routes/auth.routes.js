@@ -12,3 +12,4 @@ authRoute.post("/register", Register);
 authRoute.post("/login", Login);
 authRoute.post("/send-code", SendAuthCode);
 authRoute.post("/verify-code", VerifyAuthCode);
+authRoute.post("/alter-password", VerifyAuthCode);

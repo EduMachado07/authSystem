@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/input-otp";
 
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { apiAuth } from "@/store/configAxios";
 
@@ -37,6 +37,8 @@ const AuthCode = () => {
   const navigate = useNavigate();
   const [errorApi, setErrorApi] = useState("");
   const [disabledButton, setDisabledButton] = useState(false);
+  const [searchParams] = useSearchParams();
+  const urlToken = searchParams.get("token");
 
   const {
     control,
@@ -46,12 +48,12 @@ const AuthCode = () => {
 
   async function onSubmit(data) {
     try {
-      const res = await apiAuth.post("/register", {
-        data: data.code,
+      const res = await apiAuth.post("/verify-code", {
+        token: urlToken,
+        code: data.code,
       });
-      console.log(res);
 
-      // navigate("/profile");
+      navigate("/profile");
     } catch (error) {
       setErrorApi(error.response.data.message);
       setDisabledButton(true);
@@ -67,6 +69,10 @@ const AuthCode = () => {
       <h1 className="text-3xl text-colorPrimary font-bold w-full">
         Código de Autenticação
       </h1>
+
+      {errorApi && (
+        <p className="text-red-500 font-semibold w-full -mb-3">{errorApi}</p>
+      )}
 
       <p className="text-md font-semibold text-pretty">
         Enviamos um código de autenticação para o seu email, digite os números

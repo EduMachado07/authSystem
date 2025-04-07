@@ -2,6 +2,7 @@ import {
   sendEmailCode,
   verifyAuthCode,
 } from "../services/authCode.services.js";
+import { BadRequestError } from "../config/classErrors.config.js";
 
 async function SendAuthCode(req, res, next) {
   try {
@@ -18,11 +19,11 @@ async function SendAuthCode(req, res, next) {
 
 async function VerifyAuthCode(req, res, next) {
   try {
-    const { email, code } = req.body;
-    if (!email || !code)
+    const { token, code } = req.body;
+    if (!token || !code)
       throw new BadRequestError("Dados do usuário não informados");
 
-    await verifyAuthCode(email, code);
+    await verifyAuthCode(token, code);
 
     res.status(201).json({ message: "email do usuário verificado" });
   } catch (error) {

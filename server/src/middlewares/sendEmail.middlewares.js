@@ -1,4 +1,3 @@
-import { Resend } from "resend";
 import { BadRequestError } from "../config/classErrors.config.js";
 import nodemailer from "nodemailer";
 
